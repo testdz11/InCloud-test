@@ -32,36 +32,24 @@ jobs:
           GO111MODULE: on
         run: |
   
-          go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
-          go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
-          go install -v github.com/projectdiscovery/mapcidr/cmd/mapcidr@latest
+  
           go install -v github.com/ffuf/ffuf
         shell: bash
 
 
       - name: Running SubFinder for passive DNS enumeration
         run: |
-          echo "http://testphp.vulnweb.com" > passive_subdomains.txt
+          echo "http://testphp.vulnweb.com/" > passive_subdomains.txt
         shell: bash
 
  
 
-      - name: Running naabu to check top 1000 ports
-        run: |
-          naabu -iL output/active_subdomains.txt  -rate 10000 -top-ports 1000 | tee output/active_ports.txt
-        shell: bash
-
-
-      - name: Running httpx for HTTP webservers probbing
-        run: |
-          httpx -l output/active_ports.txt -title
-          httpx -l output/active_ports.txt | tee output/active_urls.txt
-        shell: bash
+  
       - name: Running dirscan 
         run: |
           wget https://raw.githubusercontent.com/maurosoria/dirsearch/master/db/dicc.txt
           mkdir dirout
-          set +e ;time for i in $(cat output/active_urls.txt );do ffuf -w dicc.txt -u $i/FUZZ -t 200 -mc 200 -ac -recursion -v -of csv -o dirout/`date +%Y%m%d%H%M%S`.csv; done
+          set +e ;time for i in $(cat passive_subdomains.txt );do ffuf -w dicc.txt -u $i/FUZZ -t 200 -mc 200 -ac -recursion -v -of csv -o dirout/`date +%Y%m%d%H%M%S`.csv; done
           cat dirout/*.csv >> output/dirout.csv
         shell: bash
       
