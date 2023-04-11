@@ -33,7 +33,7 @@ jobs:
         run: |
   
   
-          go install -v github.com/ffuf/ffuf
+          go install -v github.com/ffuf/ffuf/v2@latest
         shell: bash
 
 
